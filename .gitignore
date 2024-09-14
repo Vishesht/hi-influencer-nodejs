@@ -1,0 +1,34 @@
+# Node modules
+/node_modules/
+
+# Environment variables
+.env
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Directory for coverage reports
+/coverage
+
+# Build output
+/dist
+/build
+
+# IDE and editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.tgz
+*.gz
+
+# Dependency directories
+bower_components/
