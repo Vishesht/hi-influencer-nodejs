@@ -23,31 +23,34 @@ exports.updateOrCreateUser = async (req, res) => {
   try {
     const { _id, email, ...optionalFields } = req.body;
 
-    if (!_id) {
-      return res
-        .status(400)
-        .json({ message: "User ID (_id) is required for update." });
-    }
-
-    // Check if the user with the provided _id exists
-    const existingUser = await User.findById(_id);
-    if (existingUser) {
-      // If user with _id exists, update the user
-      Object.assign(existingUser, { email, ...optionalFields });
-      await existingUser.save();
-      return res.status(200).json(existingUser);
-    } else {
-      // If user with _id does not exist, check if email is taken
-      const emailTaken = await User.findOne({ email });
-      if (emailTaken) {
-        // If email exists but _id does not match, return an error
-        return res
-          .status(400)
-          .json({
-            message: "Email already exists but does not match the provided ID",
-          });
+    if (_id) {
+      // If _id is provided, check if the user exists
+      const existingUser = await User.findById(_id);
+      if (existingUser) {
+        // If user exists, update the user details
+        Object.assign(existingUser, { email, ...optionalFields });
+        await existingUser.save();
+        return res.status(200).json(existingUser);
+      } else {
+        // If user with _id does not exist, check if email is taken
+        const emailTaken = await User.findOne({ email });
+        if (emailTaken) {
+          // If email exists but _id does not match, return the existing user data
+          return res.status(200).json(emailTaken);
+        }
+        // If email is not taken, create a new user
+        const newUser = new User({ email, ...optionalFields });
+        await newUser.save();
+        return res.status(201).json(newUser);
       }
-      // If email is not taken, create a new user
+    } else {
+      // If _id is not provided, check if email is taken
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        // If email exists, return the existing user data
+        return res.status(200).json(existingUser);
+      }
+      // Create a new user if email is not taken
       const newUser = new User({ email, ...optionalFields });
       await newUser.save();
       return res.status(201).json(newUser);

@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: false },
   photoURL: { type: String, required: false },
   uid: { type: Number, required: false },
-  id: { type: String, required: true, unique: true }, // Custom unique ID
   gender: { type: String, required: false },
   dob: { type: String, required: false },
   state: { type: String, required: false },
