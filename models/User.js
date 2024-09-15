@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid"); // Import uuid
 
 const userSchema = new mongoose.Schema({
+  username: { type: String, required: false },
   name: { type: String, required: false },
   email: { type: String, unique: true },
   isInfluencer: { type: Boolean, required: false },
