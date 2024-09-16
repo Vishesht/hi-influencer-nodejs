@@ -1,14 +1,14 @@
 const User = require("../models/User");
 const LoginModel = require("../models/Login");
 const { v4: uuidv4 } = require("uuid");
-
+const bcrypt = require("bcrypt");
 // Get a user by ID
 exports.getUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findOne({ id });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Data not found" });
     }
     res.json(user);
   } catch (error) {
@@ -17,23 +17,81 @@ exports.getUser = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
-  const { name, email } = req.body;
-  if (!name || !email) {
-    return res.status(400).json({ message: "Name and email are required" });
+exports.register = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Name, email, and password are required" });
   }
+
   try {
+    // Check if the user already exists
     let user = await LoginModel.findOne({ email });
 
     if (user) {
-      user.name = name;
-      await user.save();
-    } else {
-      const newUser = new LoginModel({ id: uuidv4(), name, email });
-      user = await newUser.save();
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    res.status(200).json({ message: "User logged in successfully", user });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const newUser = new LoginModel({
+      id: uuidv4(),
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    user = await newUser.save();
+    res.status(201).json({ message: "User registered successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.login = async (req, res) => {
+  const { name, email, gmailLogin, password } = req.body;
+  try {
+    if (gmailLogin) {
+      if (gmailLogin && !name && !email) {
+        return res
+          .status(400)
+          .json({ message: "Name & Email is required for login" });
+      }
+      let user = await LoginModel.findOne({ email });
+      if (user) {
+        user.name = name;
+        await user.save();
+      } else {
+        const newUser = new LoginModel({
+          id: uuidv4(),
+          name,
+          email,
+          gmailLogin: true,
+        });
+        user = await newUser.save();
+      }
+      res.status(200).json({ message: "User logged in successfully", user });
+    } else {
+      if (!password || !email) {
+        return res
+          .status(400)
+          .json({ message: "Name and password are required" });
+      }
+      let user = await LoginModel.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
+      res.status(200).json({ message: "User logged in successfully", user });
+    }
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
@@ -41,7 +99,6 @@ exports.login = async (req, res) => {
 
 // Create a new user
 exports.updateOrCreateUser = async (req, res) => {
-  console.log("first", req.body);
   const {
     id,
     email,
