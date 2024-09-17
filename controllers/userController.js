@@ -191,3 +191,16 @@ exports.getUserByUsername = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getUserList = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    const users = await User.find({ id: { $ne: userId } });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
