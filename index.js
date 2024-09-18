@@ -15,9 +15,12 @@ const app = express();
 app.use(morgan("dev")); // Logging
 app.use(
   cors({
-    origin: "https://hi-influencer-web-qd5q.vercel.app", // Your frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-    credentials: true, // Allow credentials (if needed)
+    origin: [
+      "http://localhost:3000",
+      "https://hi-influencer-web-qd5q.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 app.use(express.json()); // Parse JSON bodies
