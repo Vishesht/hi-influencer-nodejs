@@ -57,3 +57,57 @@ exports.getAllAds = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getUserAds = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    const ads = await Ads.find({ id: userId });
+    if (ads.length === 0) {
+      return res.status(404).json({ message: "No ads found for this user" });
+    }
+    res.json(ads);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.editAd = async (req, res) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+  try {
+    const updatedAd = await Ads.findByIdAndUpdate(userId, updateData, {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure that validators are run
+    });
+
+    if (!updatedAd) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.json({ message: "Ad updated successfully", updatedAd });
+  } catch (error) {
+    console.error("Error updating ad:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// New API to delete an ad by _id
+exports.deleteAd = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const deletedAd = await Ads.findByIdAndDelete(userId);
+
+    if (!deletedAd) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.json({ message: "Ad deleted successfully", deletedAd });
+  } catch (error) {
+    console.error("Error deleting ad:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

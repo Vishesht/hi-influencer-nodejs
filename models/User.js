@@ -22,15 +22,7 @@ const userSchema = new mongoose.Schema({
   address: { type: String, required: false },
   images: [{ type: String, required: false }],
   category: { type: String, required: false },
-  packages: [
-    {
-      type: { type: String, required: false },
-      price: { type: String, required: false },
-      duration: { type: String, required: false },
-      reach: { type: String, required: false },
-      engagement: { type: String, required: false },
-    },
-  ],
+  packages: Array,
   reviewsData: [
     {
       user: { type: String, required: false },
