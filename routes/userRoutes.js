@@ -22,11 +22,16 @@ router.delete("/deleteuserads/:userId", adsController.deleteAd);
 //Hire Influencer
 router.post("/saveneworder", ordersController.saveneworder);
 router.get("/getorders/:userId", ordersController.getOrderById);
+router.get(
+  "/getOrderByInfluencerId/:userId",
+  ordersController.getOrderByInfluencerId
+);
 
 //Admin
 
 //Orders
 router.get("/admin/getAllOrders", ordersController.getAllOrders);
-router.put("/admin/approveOrder", ordersController.approveOrder);
+// router.put("/admin/approveOrder", ordersController.approveOrder);
+router.put("/changeStatus", ordersController.changeStatus);
 
 module.exports = router;
