@@ -196,11 +196,27 @@ exports.getUserList = async (req, res) => {
   try {
     const { userId } = req.params;
     if (!userId) {
-      return res.status(400).json({ message: 'User ID is required' });
+      return res.status(400).json({ message: "User ID is required" });
     }
     const users = await User.find({ id: { $ne: userId } });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-}
+};
+
+exports.getUserDetailsByIds = async (req, res) => {
+  const { userIds } = req.body; // Expecting an array of user IDs in the request body
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ message: "User IDs are required" });
+  }
+
+  try {
+    const users = await User.find({ id: { $in: userIds } }); // Fetch users by IDs
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

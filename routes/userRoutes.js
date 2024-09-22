@@ -11,13 +11,19 @@ router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);
 router.get("/user/:username", userController.getUserByUsername);
 router.get("/userlist/:userId", userController.getUserList);
+router.post("/users/details", userController.getUserDetailsByIds);
 
 //ADS
 router.post("/postads", adsController.postAds);
-router.get("/getallads", adsController.getAllAds);
+router.get("/getallads/:userId", adsController.getAllAds);
 router.get("/getuserads/:userId", adsController.getUserAds);
 router.put("/edituserads/:userId", adsController.editAd);
 router.delete("/deleteuserads/:userId", adsController.deleteAd);
+router.post("/ads/:adId/apply", adsController.applyForAd);
+// Route for accepting an applicant
+router.post("/ads/:adId/accept/:userId", adsController.acceptApplicant);
+// Route for rejecting an applicant
+router.post("/ads/:adId/reject/:userId", adsController.rejectApplicant);
 
 //Hire Influencer
 router.post("/saveneworder", ordersController.saveneworder);

@@ -12,6 +12,8 @@ const adsSchema = new mongoose.Schema({
   desc: { type: String, required: true },
   category: { type: String },
   budget: { type: String },
+  applicants: [{ type: String }],
+  accepted: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -51,7 +51,11 @@ exports.postAds = async (req, res) => {
 
 exports.getAllAds = async (req, res) => {
   try {
-    const ads = await Ads.find();
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    const ads = await Ads.find({ id: { $ne: userId } });
     res.json(ads);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -108,6 +112,81 @@ exports.deleteAd = async (req, res) => {
     res.json({ message: "Ad deleted successfully", deletedAd });
   } catch (error) {
     console.error("Error deleting ad:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.applyForAd = async (req, res) => {
+  const { adId } = req.params; // Get the ad ID from the request parameters
+  const { userId } = req.body; // Get the user ID from the request body
+
+  // Check if userId is provided
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  try {
+    // Find the ad by ID and update its applicants array
+    const updatedAd = await Ads.findByIdAndUpdate(
+      adId,
+      { $addToSet: { applicants: userId } }, // Add userId to applicants if it doesn't exist
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedAd) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.json({ message: "Applied for ad successfully", updatedAd });
+  } catch (error) {
+    console.error("Error applying for ad:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.acceptApplicant = async (req, res) => {
+  const { adId, userId } = req.params; // Get the ad ID and user ID from params
+
+  try {
+    // Update the ad to move the user ID from applicants to accepted
+    const updatedAd = await Ads.findByIdAndUpdate(
+      adId,
+      {
+        $addToSet: { accepted: userId }, // Add userId to accepted array
+        $pull: { applicants: userId }, // Remove userId from applicants array
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedAd) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.json({ message: "Applicant accepted", updatedAd });
+  } catch (error) {
+    console.error("Error accepting applicant:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.rejectApplicant = async (req, res) => {
+  const { adId, userId } = req.params; // Get the ad ID and user ID from params
+
+  try {
+    // Update the ad to remove the user ID from the applicants array
+    const updatedAd = await Ads.findByIdAndUpdate(
+      adId,
+      { $pull: { applicants: userId } }, // Remove userId from applicants array
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedAd) {
+      return res.status(404).json({ message: "Ad not found" });
+    }
+
+    res.json({ message: "Applicant rejected", updatedAd });
+  } catch (error) {
+    console.error("Error rejecting applicant:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
