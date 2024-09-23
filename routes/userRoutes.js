@@ -11,7 +11,9 @@ router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);
 router.get("/user/:username", userController.getUserByUsername);
 router.get("/userlist/:userId", userController.getUserList);
+router.get("/admin/userlist", userController.getAdminUserList);
 router.post("/users/details", userController.getUserDetailsByIds);
+router.put("/users/:id/influencer", userController.verifyAccount);
 
 //ADS
 router.post("/postads", adsController.postAds);

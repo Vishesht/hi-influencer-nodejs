@@ -117,6 +117,7 @@ exports.updateOrCreateUser = async (req, res) => {
     category,
     packages,
     reviewsData,
+    isClient,
   } = req.body;
 
   if (!email && !id) {
@@ -144,6 +145,7 @@ exports.updateOrCreateUser = async (req, res) => {
         category,
         packages,
         reviewsData,
+        isClient,
       });
       await user.save();
     } else {
@@ -166,6 +168,7 @@ exports.updateOrCreateUser = async (req, res) => {
         category,
         packages,
         reviewsData,
+        isClient,
       });
       await user.save();
     }
@@ -198,7 +201,16 @@ exports.getUserList = async (req, res) => {
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
     }
-    const users = await User.find({ id: { $ne: userId } });
+    const users = await User.find({ id: { $ne: userId }, isInfluencer: true });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getAdminUserList = async (req, res) => {
+  try {
+    const users = await User.find();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -218,5 +230,25 @@ exports.getUserDetailsByIds = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user details:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.verifyAccount = async (req, res) => {
+  const { verified } = req.query;
+  const { id } = req.params;
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { id },
+      {
+        isInfluencer: true,
+        verified: verified ? true : false,
+      }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

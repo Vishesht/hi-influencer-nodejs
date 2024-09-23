@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: false },
   email: { type: String, unique: true },
   isInfluencer: { type: Boolean, required: false },
+  verified: { type: Boolean, required: false },
+  isClient: { type: Boolean, required: false },
   phoneNumber: { type: String, required: false },
   photoURL: { type: String, required: false },
   gender: { type: String, required: false },
