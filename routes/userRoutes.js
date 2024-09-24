@@ -6,6 +6,7 @@ const ordersController = require("../controllers/ordersController");
 
 router.post("/login", userController.login);
 router.post("/register", userController.register);
+router.put("/update-fcm-token", userController.updateFcmToken);
 
 router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);

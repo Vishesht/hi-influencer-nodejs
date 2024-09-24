@@ -52,6 +52,37 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.updateFcmToken = async (req, res) => {
+  const { email, fcmToken } = req.body;
+
+  if (!email || !fcmToken) {
+    return res
+      .status(400)
+      .json({ message: "Email and FCM Token are required" });
+  }
+
+  try {
+    // Check if the user exists
+    const user = await LoginModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the FCM token
+    user.fcmToken = fcmToken;
+
+    await user.save();
+    return res
+      .status(200)
+      .json({ message: "FCM Token updated successfully", user });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+};
+
 exports.login = async (req, res) => {
   const { name, email, gmailLogin, password } = req.body;
   try {
