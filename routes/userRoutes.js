@@ -15,6 +15,7 @@ router.get("/userlist/:userId", userController.getUserList);
 router.get("/admin/userlist", userController.getAdminUserList);
 router.post("/users/details", userController.getUserDetailsByIds);
 router.put("/users/:id/influencer", userController.verifyAccount);
+router.post("/addReview", userController.addReview);
 
 //ADS
 router.post("/postads", adsController.postAds);
@@ -30,6 +31,7 @@ router.post("/ads/:adId/reject/:userId", adsController.rejectApplicant);
 
 //Hire Influencer
 router.post("/saveneworder", ordersController.saveneworder);
+router.put("/orders/update", ordersController.updateOrder);
 router.get("/getorders/:userId", ordersController.getOrderById);
 router.get(
   "/getOrderByInfluencerId/:userId",
@@ -42,5 +44,6 @@ router.get(
 router.get("/admin/getAllOrders", ordersController.getAllOrders);
 // router.put("/admin/approveOrder", ordersController.approveOrder);
 router.put("/changeStatus", ordersController.changeStatus);
+router.put("/orders/requestedChanges", ordersController.requestedChanges);
 
 module.exports = router;

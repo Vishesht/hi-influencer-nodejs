@@ -27,9 +27,12 @@ const userSchema = new mongoose.Schema({
   packages: Array,
   reviewsData: [
     {
-      user: { type: String, required: false },
-      rating: { type: Number, required: false },
-      comment: { type: String, required: false },
+      rating: { type: Number, required: true },
+      review: { type: String, required: true },
+      userId: { type: String, required: true },
+      orderId: { type: String, required: true },
+      influencerId: { type: String, required: true },
+      timestamp: { type: Date, default: Date.now },
     },
   ],
 });

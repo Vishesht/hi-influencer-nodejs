@@ -283,3 +283,36 @@ exports.verifyAccount = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.addReview = async (req, res) => {
+  const { userId, influencerId, rating, review, orderId } = req.body;
+  if (!userId || !influencerId || !rating || !review || !orderId) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+  try {
+    const influencer = await User.findOne({
+      id: influencerId,
+      isInfluencer: true,
+    });
+    if (!influencer) {
+      return res.status(404).json({ message: "Influencer not found" });
+    }
+    const newReview = {
+      userId,
+      influencerId,
+      rating,
+      review,
+      orderId,
+      timestamp: new Date(),
+    };
+    influencer.reviewsData.push(newReview);
+    await influencer.save();
+    res.status(200).json({
+      message: "Review added successfully!",
+      reviewsData: influencer.reviewsData,
+    });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ message: "Failed to add review", error });
+  }
+};
