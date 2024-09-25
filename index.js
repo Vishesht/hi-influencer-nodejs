@@ -5,6 +5,8 @@ const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet"); // Added for security best practices
 const { errorHandler } = require("./middleware/errorHandler");
+const notificationRoutes = require("./routes/notificationService");
+const userRoutes = require("./routes/userRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -36,10 +38,10 @@ mongoose
   .catch((err) => console.log("MongoDB connection error:", err));
 
 // Routes
-const userRoutes = require("./routes/userRoutes");
 app.get("/", (req, res) => res.send("Server working."));
 
 app.use("/api", userRoutes);
+app.use("/service", notificationRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

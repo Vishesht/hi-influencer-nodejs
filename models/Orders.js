@@ -6,6 +6,7 @@ const ordersSchema = new mongoose.Schema({
   loggedUserId: { type: String, required: true },
   influencerId: { type: String, required: true },
   orderDetails: [{ type: Object, required: true }],
+  requestedChanges: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 
