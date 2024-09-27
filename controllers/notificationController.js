@@ -1,13 +1,23 @@
 const Login = require("../models/Login");
+const Notification = require("../models/NotificationModal");
 const { sendNotification } = require("../services/notificationService");
+const { v4: uuidv4 } = require("uuid");
 
 exports.sendNotification = async (req, res) => {
-  const { email, title, body } = req.body;
-
+  let { email, title, body } = req.body;
   if (!email || !title || !body) {
     return res
       .status(400)
       .json({ message: "Email, title, and body are required" });
+  }
+
+  // Define the pattern for checking if the title contains the "sent a message" phrase
+  const messagePattern = /(.*) sent a message$/i;
+
+  // If the title matches the pattern, extract the name and modify the title
+  const match = title.match(messagePattern);
+  if (match) {
+    title = match[1]; // Extracted name (Vishesht Gupta)
   }
 
   try {
@@ -18,15 +28,78 @@ exports.sendNotification = async (req, res) => {
         .json({ message: "User not found or FCM token missing" });
     }
 
+    // Modify the notification object
     const notification = { title, body };
     const response = await sendNotification(user.fcmToken, notification);
 
-    res
-      .status(200)
-      .json({ message: "Notification sent successfully", response });
+    if (!match) {
+      // Save the notification in the database
+      const newNotification = new Notification({
+        id: uuidv4(),
+        email,
+        title, // Here the title will be the extracted name (e.g., Vishesht Gupta)
+        body,
+        read: false,
+      });
+
+      await newNotification.save();
+
+      res.status(200).json({
+        message: "Notification sent and saved successfully",
+        response,
+      });
+    }
   } catch (error) {
     res
       .status(500)
       .json({ message: "Error sending notification", error: error.message });
+  }
+};
+
+exports.markNotificationAsRead = async (req, res) => {
+  const { id } = req.body; // Assuming you pass the notification ID to mark it as read
+
+  if (!id) {
+    return res.status(400).json({ message: "Notification ID is required" });
+  }
+
+  try {
+    const notification = await Notification.findByIdAndUpdate(
+      id,
+      { read: true }, // Set read to true
+      { new: true } // Return the updated document
+    );
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Notification marked as read", notification });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error marking notification as read",
+      error: error.message,
+    });
+  }
+};
+
+exports.getUserNotifications = async (req, res) => {
+  console.log("first", req.params);
+  const { email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+  try {
+    const notifications = await Notification.find({ email });
+    res
+      .status(200)
+      .json({ message: "Notifications retrieved successfully", notifications });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching notifications", error: error.message });
   }
 };
