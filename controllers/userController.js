@@ -232,7 +232,7 @@ exports.getUserList = async (req, res) => {
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
     }
-    const users = await User.find({ id: { $ne: userId }, isInfluencer: true });
+    const users = await User.find({ id: { $ne: userId }, verified: true });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
