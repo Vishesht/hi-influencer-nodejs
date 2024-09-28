@@ -119,6 +119,7 @@ exports.getOrderByInfluencerId = async (req, res) => {
             influencerDetails: {
               name: user.name,
               gender: user.gender,
+              email: user.email,
               state: user.state,
               address: user.address,
               influencerImg: user.photoURL,
@@ -130,7 +131,7 @@ exports.getOrderByInfluencerId = async (req, res) => {
             `Error fetching influencer with ID ${order.influencerId}:`,
             err
           );
-          return { ...order._doc, influencerDetails: null }; // Return null if influencer not found
+          return { ...order._doc, influencerDetails: null };
         }
       })
     );
