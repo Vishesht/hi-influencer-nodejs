@@ -22,15 +22,14 @@ exports.sendNotification = async (req, res) => {
 
   try {
     const user = await Login.findOne({ email });
-    if (!user || !user.fcmToken) {
-      return res
-        .status(404)
-        .json({ message: "User not found or FCM token missing" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Modify the notification object
     const notification = { title, body };
-    const response = await sendNotification(user.fcmToken, notification);
+    const response =
+      user.fcmToken && (await sendNotification(user.fcmToken, notification));
 
     if (!match) {
       // Save the notification in the database
@@ -86,7 +85,6 @@ exports.markNotificationAsRead = async (req, res) => {
 };
 
 exports.getUserNotifications = async (req, res) => {
-  console.log("first", req.params);
   const { email } = req.params;
 
   if (!email) {
@@ -101,5 +99,27 @@ exports.getUserNotifications = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching notifications", error: error.message });
+  }
+};
+
+exports.markAllAsRead = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+  try {
+    const result = await Notification.updateMany(
+      { email, read: false },
+      { $set: { read: true } }
+    );
+    res.status(200).json({
+      message: "All notifications marked as read",
+      updatedCount: result.nModified,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error marking notifications as read",
+      error: error.message,
+    });
   }
 };
