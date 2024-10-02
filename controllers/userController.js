@@ -92,9 +92,11 @@ exports.login = async (req, res) => {
           .status(400)
           .json({ message: "Name & Email is required for login" });
       }
+
       let user = await LoginModel.findOne({ email });
       if (user) {
-        user.name = name;
+        user.name = name; // Update the name if the user already exists
+        user.firstLogin = false; // Existing users should have firstLogin set to false
         await user.save();
       } else {
         const newUser = new LoginModel({
@@ -102,26 +104,53 @@ exports.login = async (req, res) => {
           name,
           email,
           gmailLogin: true,
+          firstLogin: true, // Set firstLogin to true for new users
         });
         user = await newUser.save();
       }
-      res.status(200).json({ message: "User logged in successfully", user });
+
+      // Send back the user details including firstLogin
+      res.status(200).json({
+        message: "User logged in successfully",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          gmailLogin: user.gmailLogin,
+          firstLogin: user.firstLogin, // Include firstLogin in the response
+        },
+      });
     } else {
       if (!password || !email) {
         return res
           .status(400)
           .json({ message: "Name and password are required" });
       }
+
       let user = await LoginModel.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
-      const isMatch = await bcrypt.compare(password, user.password);
 
+      const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({ message: "Invalid password" });
       }
-      res.status(200).json({ message: "User logged in successfully", user });
+
+      user.firstLogin = false; // Set firstLogin to false for returning users
+      await user.save();
+
+      // Send back the user details including firstLogin
+      res.status(200).json({
+        message: "User logged in successfully",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          gmailLogin: user.gmailLogin,
+          firstLogin: user.firstLogin, // Include firstLogin in the response
+        },
+      });
     }
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -292,7 +321,7 @@ exports.addReview = async (req, res) => {
   try {
     const influencer = await User.findOne({
       id: influencerId,
-      isInfluencer: true,
+      verified: true,
     });
     if (!influencer) {
       return res.status(404).json({ message: "Influencer not found" });
@@ -314,5 +343,29 @@ exports.addReview = async (req, res) => {
   } catch (error) {
     console.error("Error adding review:", error);
     res.status(500).json({ message: "Failed to add review", error });
+  }
+};
+
+exports.checkUserName = async (req, res) => {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(400).json({ message: "Username is required" });
+  }
+  try {
+    const user = await User.findOne({ username: username });
+    if (user) {
+      return res
+        .status(200)
+        .json({ available: false, message: "Username is taken" });
+    } else {
+      return res
+        .status(200)
+        .json({ available: true, message: "Username is available" });
+    }
+  } catch (error) {
+    console.error("Error checking username availability:", error);
+    return res
+      .status(500)
+      .json({ message: "Error occurred while checking username" });
   }
 };

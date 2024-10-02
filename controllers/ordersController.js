@@ -75,6 +75,7 @@ exports.getOrderById = async (req, res) => {
               name: influencer.name,
               gender: influencer.gender,
               state: influencer.state,
+              email: influencer.email,
               address: influencer.address,
               influencerImg: influencer.photoURL,
               reviewsData: influencer.reviewsData.map(
