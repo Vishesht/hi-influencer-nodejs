@@ -3,6 +3,7 @@ const LoginModel = require("../models/Login");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const Otp = require("../models/Otp");
+const { generateOtp, transporter } = require("../services/otpService");
 require("dotenv").config();
 
 // Register a new user
@@ -138,22 +139,6 @@ exports.updateFcmToken = async (req, res) => {
   }
 };
 
-// Create a transporter instance
-const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false, // true for port 465, false for other ports
-  auth: {
-    user: "ibrahim92@ethereal.email",
-    pass: "cW5Ga59j8uXCV8EjyY",
-  },
-});
-
-// Generate a random OTP
-const generateOtp = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-};
-
 // Send OTP function
 exports.sendOtp = async (req, res) => {
   const { email } = req.body;
@@ -188,7 +173,6 @@ exports.sendOtp = async (req, res) => {
       html: `<p>Your OTP code is <strong>${otp}</strong>. It is valid for <strong>10 minutes</strong>.</p>`, // HTML body
     });
 
-    console.log("Message sent: %s", info.messageId);
     res.status(200).json({ message: "OTP sent successfully." });
   } catch (error) {
     console.error("Error sending OTP:", error);
@@ -204,7 +188,6 @@ exports.verifyOtp = async (req, res) => {
   try {
     // Find the OTP entry in the database
     const otpEntry = await Otp.findOne({ email, otp });
-
     // Check if OTP entry exists and is not expired (e.g., valid for 10 minutes)
     if (!otpEntry) {
       return res.status(400).json({ message: "Invalid OTP." });
@@ -251,5 +234,25 @@ exports.changePassword = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to change password. Please try again." });
+  }
+};
+
+exports.sendNewUserOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const otp = generateOtp();
+    await Otp.create({ email, otp, createdAt: Date.now() });
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // Sender address
+      to: email, // Receiver's email
+      subject: "Your OTP Code", // Subject line
+      text: `Your OTP code is ${otp}. It is valid for 10 minutes.`, // Plain text body
+      html: `<p>Your OTP code is <strong>${otp}</strong>. It is valid for <strong>10 minutes</strong>.</p>`, // HTML body
+    });
+    res.status(200).json({ message: "OTP sent successfully." });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to send OTP. Please try again later." });
   }
 };

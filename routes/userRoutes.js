@@ -11,6 +11,7 @@ router.put("/update-fcm-token", loginController.updateFcmToken);
 router.post("/sendOtp", loginController.sendOtp);
 router.post("/verify-otp", loginController.verifyOtp);
 router.post("/change-password", loginController.changePassword);
+router.post("/send-new-user-otp", loginController.sendNewUserOtp);
 
 router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);
