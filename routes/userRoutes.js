@@ -11,6 +11,7 @@ router.put("/update-fcm-token", userController.updateFcmToken);
 router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);
 router.get("/user/:username", userController.getUserByUsername);
+router.get("/check-username", userController.checkUserName);
 router.get("/userlist/:userId", userController.getUserList);
 router.get("/admin/userlist", userController.getAdminUserList);
 router.post("/users/details", userController.getUserDetailsByIds);

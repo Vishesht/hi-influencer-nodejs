@@ -6,6 +6,7 @@ const loginSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   gmailLogin: { type: Boolean, require: true },
   password: { type: String, require: false },
+  firstLogin: { type: Boolean, default: true },
   fcmToken: { type: String, require: false },
 });
 
