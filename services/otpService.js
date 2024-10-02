@@ -1,5 +1,7 @@
+const nodemailer = require("nodemailer");
+
 // Create a transporter instance
-export const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp.ethereal.email",
   port: 587,
   secure: false, // true for port 465, false for other ports
@@ -10,6 +12,9 @@ export const transporter = nodemailer.createTransport({
 });
 
 // Generate a random OTP
-export const generateOtp = () => {
+const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
 };
+
+// Export the transporter and generateOtp function
+module.exports = { transporter, generateOtp };
