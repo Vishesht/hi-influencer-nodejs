@@ -1,12 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const loginController = require("../controllers/loginController");
 const userController = require("../controllers/userController");
 const adsController = require("../controllers/adsController");
 const ordersController = require("../controllers/ordersController");
 
-router.post("/login", userController.login);
-router.post("/register", userController.register);
-router.put("/update-fcm-token", userController.updateFcmToken);
+router.post("/login", loginController.login);
+router.post("/register", loginController.register);
+router.put("/update-fcm-token", loginController.updateFcmToken);
+router.post("/sendOtp", loginController.sendOtp);
+router.post("/verify-otp", loginController.verifyOtp);
+router.post("/change-password", loginController.changePassword);
 
 router.post("/users", userController.updateOrCreateUser);
 router.get("/users/:id", userController.getUser);
