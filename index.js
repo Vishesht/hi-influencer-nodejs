@@ -20,7 +20,8 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://hi-influencer-web-qd5q.vercel.app",
-      "https://hiinfluencer.in"
+      "https://hiinfluencer.in",
+      "https://www.hiinfluencer.in"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
