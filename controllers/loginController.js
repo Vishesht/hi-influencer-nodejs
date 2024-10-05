@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const Otp = require("../models/Otp");
 const { generateOtp, transporter } = require("../services/otpService");
+const { credentials } = require("../config/utils");
 require("dotenv").config();
 
 // Register a new user
@@ -163,15 +164,15 @@ exports.sendOtp = async (req, res) => {
 
     // Store OTP in database or cache for later verification
     await Otp.create({ email, otp, createdAt: Date.now() });
-
-    // Send OTP email
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER, // Sender address
+    const cred = {
+      from: credentials.user, // Sender address
       to: email, // Receiver's email
       subject: "Your OTP Code", // Subject line
       text: `Your OTP code is ${otp}. It is valid for 10 minutes.`, // Plain text body
       html: `<p>Your OTP code is <strong>${otp}</strong>. It is valid for <strong>10 minutes</strong>.</p>`, // HTML body
-    });
+    };
+    // Send OTP email
+    const info = await transporter.sendMail(cred);
 
     res.status(200).json({ message: "OTP sent successfully." });
   } catch (error) {
@@ -243,7 +244,7 @@ exports.sendNewUserOtp = async (req, res) => {
     const otp = generateOtp();
     await Otp.create({ email, otp, createdAt: Date.now() });
     await transporter.sendMail({
-      from: process.env.EMAIL_USER, // Sender address
+      from: credentials.user, // Sender address
       to: email, // Receiver's email
       subject: "Your OTP Code", // Subject line
       text: `Your OTP code is ${otp}. It is valid for 10 minutes.`, // Plain text body
