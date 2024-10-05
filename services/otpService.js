@@ -1,13 +1,16 @@
 const nodemailer = require("nodemailer");
+const { credentials } = require("../config/utils");
 
 // Create a transporter instance
 const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
-  secure: false, // true for port 465, false for other ports
+  host: "smtpout.secureserver.net",
+  secure: true,
+  port: 465,
+  // logger: true,
+  // debug: true,
   auth: {
-    user: "ibrahim92@ethereal.email",
-    pass: "cW5Ga59j8uXCV8EjyY",
+    user: credentials.user,
+    pass: credentials.pass,
   },
 });
 
