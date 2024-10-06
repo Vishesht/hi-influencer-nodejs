@@ -22,6 +22,8 @@ router.get("/admin/userlist", userController.getAdminUserList);
 router.post("/users/details", userController.getUserDetailsByIds);
 router.put("/users/:id/influencer", userController.verifyAccount);
 router.post("/addReview", userController.addReview);
+router.patch("/editPackage", userController.editPackage);
+router.delete("/deletePackage/:id", userController.deletePackage);
 
 //ADS
 router.post("/postads", adsController.postAds);
