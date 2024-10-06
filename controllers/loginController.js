@@ -1,5 +1,5 @@
-const nodemailer = require("nodemailer");
 const LoginModel = require("../models/Login");
+const User = require("../models/User");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
 const Otp = require("../models/Otp");
@@ -41,6 +41,7 @@ exports.register = async (req, res) => {
 // User login
 exports.login = async (req, res) => {
   const { name, email, gmailLogin, password } = req.body;
+  let isUserAvailable = await User.findOne({ email });
   try {
     if (gmailLogin) {
       if (!name || !email) {
@@ -52,7 +53,7 @@ exports.login = async (req, res) => {
       let user = await LoginModel.findOne({ email });
       if (user) {
         user.name = name;
-        user.firstLogin = false;
+        user.firstLogin = isUserAvailable ? false : true;
         await user.save();
       } else {
         const newUser = new LoginModel({
@@ -93,7 +94,7 @@ exports.login = async (req, res) => {
         return res.status(401).json({ message: "Invalid password" });
       }
 
-      user.firstLogin = false;
+      user.firstLogin = isUserAvailable ? false : true;
       await user.save();
 
       res.status(200).json({
