@@ -227,3 +227,74 @@ exports.checkUserName = async (req, res) => {
       .json({ message: "Error occurred while checking username" });
   }
 };
+
+// Edit a package in the user's packages array(not using right now)
+exports.editPackage = async (req, res) => {
+  const { id } = req.params;
+  const { name, newData } = req.body; // 'name' is the package to edit, 'newData' is the updated package data
+
+  if (!name || !newData) {
+    return res
+      .status(400)
+      .json({ message: "'name' and 'newData' are required" });
+  }
+
+  try {
+    // Find the user
+    const user = await User.findOne({ id });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the package by 'name' and update it with the new data
+    const packageIndex = user.packages.findIndex((pkg) => pkg.name === name);
+
+    if (packageIndex === -1) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    // Update the package data
+    user.packages[packageIndex].data = newData;
+    await user.save();
+
+    res.json({ message: "Package updated successfully", user });
+  } catch (error) {
+    console.error("Error editing package:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a package from the user's packages array
+exports.deletePackage = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body; // 'name' is the package to delete
+  if (!name) {
+    return res.status(400).json({ message: "'name' is required" });
+  }
+
+  try {
+    // Find the user
+    const user = await User.findOne({ id });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Find the index of the package by 'name'
+    const packageIndex = user.packages.findIndex((pkg) => pkg.name === name);
+
+    if (packageIndex === -1) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    // Remove the package from the array
+    user.packages.splice(packageIndex, 1);
+    await user.save();
+
+    res.json({ message: "Package deleted successfully", user });
+  } catch (error) {
+    console.error("Error deleting package:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
