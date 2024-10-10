@@ -87,6 +87,12 @@ exports.login = async (req, res) => {
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
+      if (!user?.password) {
+        return res.status(401).json({
+          message:
+            "An account with this email address is already associated with a Google login. Please use a different email address or sign in with your existing account.",
+        });
+      }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
