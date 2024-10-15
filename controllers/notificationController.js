@@ -2,9 +2,11 @@ const Login = require("../models/Login");
 const Notification = require("../models/NotificationModal");
 const { sendNotification } = require("../services/notificationService");
 const { v4: uuidv4 } = require("uuid");
+const { transporter } = require("../services/otpService");
+const { credentials } = require("../config/utils");
 
 exports.sendNotification = async (req, res) => {
-  let { email, title, body } = req.body;
+  let { email, title, body, html } = req.body;
   if (!email || !title || !body) {
     return res
       .status(400)
@@ -42,7 +44,15 @@ exports.sendNotification = async (req, res) => {
       });
 
       await newNotification.save();
-
+      const cred = {
+        from: credentials.user,
+        to: email,
+        subject: title,
+        text: body,
+        html: html ? html : "",
+      };
+      // Send OTP email
+      const info = await transporter.sendMail(cred);
       res.status(200).json({
         message: "Notification sent and saved successfully",
         response,
